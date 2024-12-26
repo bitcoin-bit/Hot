@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أسعار العملات الرقمية</title>
+    <style>
+        /* تصميم عام */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        /* حقل البحث */
+        #search {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        #search:focus {
+            border-color: #45a049;
+        }
+
+        /* الجدول */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #e2e2e2;
+        }
+
+        /* العملات الجديدة */
+        .new-coin {
+            background-color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        /* الزر */
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* استجابة للهاتف المحمول */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            #search {
+                font-size: 1rem;
+            }
+
+            table th, table td {
+                padding: 10px;
+            }
+
+            button {
+                width: 100%;
+                font-size: 1rem;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>أسعار العملات الرقمية</h1>
+        <input type="text" id="search" placeholder="بحث عن عملة..." onkeyup="searchCurrency()">
+        <table id="cryptoTable">
+            <thead>
+                <tr>
+                    <th>العملة</th>
+                    <th>السعر</th>
+                    <th>التغيير (24 ساعة)</th>
+                    <th>حجم التداول (24 ساعة)</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- بيانات العملات ستظهر هنا -->
+            </tbody>
+        </table>
+        <button id="loadMoreBtn" onclick="loadMoreData()">عرض المزيد</button>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const limit = 10;
+        let lastFetchedData = [];
+
+        function fetchData() {
+            fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=${currentPage}&sparkline=false`)
+                .then(response => response.json())
+                .then(data => {
+                    // التحقق من العملات الجديدة ومقارنتها مع البيانات السابقة
+                    if (lastFetchedData.length > 0) {
+                        const newCoins = data.filter(coin => !lastFetchedData.some(lastCoin => lastCoin.id === coin.id));
+                        if (newCoins.length > 0) {
+                            displayNewCoins(newCoins); // عرض العملات الجديدة فقط
+                        }
+                    }
+
+                    displayData(data); // عرض جميع العملات
+                    lastFetchedData = data; // تحديث البيانات السابقة
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function displayData(data) {
+            const tableBody = document.getElementById('tableBody');
+            data.forEach(coin => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${coin.name}</td>
+                    <td>${coin.current_price} USD</td>
+                    <td>${coin.price_change_percentage_24h.toFixed(2)}%</td>
+                    <td>${coin.total_volume.toLocaleString()} USD</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function displayNewCoins(newCoins) {
+            const tableBody = document.getElementById('tableBody');
+            newCoins.forEach(coin => {
+                const row = document.createElement('tr');
+                row.classList.add('new-coin'); // إضافة فئة لتمييز العملات الجديدة
+                row.innerHTML = `
+                    <td>${coin.name} (جديد)</td>
+                    <td>${coin.current_price} USD</td>
+                    <td>${coin.price_change_percentage_24h.toFixed(2)}%</td>
+                    <td>${coin.total_volume.toLocaleString()} USD</td>
+                `;
+                tableBody.insertBefore(row, tableBody.firstChild); // إضافة العملة الجديدة في أعلى الجدول
+            });
+        }
+
+        function searchCurrency() {
+            const searchValue = document.getElementById('search').value.toLowerCase();
+            const rows = document.querySelectorAll('#cryptoTable tbody tr');
+            rows.forEach(row => {
+                const cell = row.querySelector('td');
+                if (cell && cell.textContent.toLowerCase().includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function loadMoreData() {
+            currentPage++;
+            fetchData();
+        }
+
+        // تحديث البيانات كل 10 ثوانٍ
+        setInterval(fetchData, 10000);
+
+        // تحميل البيانات الأولى عند تحميل الصفحة
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
