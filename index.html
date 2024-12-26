@@ -67,6 +67,7 @@
             background-color: #4CAF50;
             color: white;
             font-size: 1.1rem;
+            transition: background-color 0.5s;
         }
 
         tr:nth-child(even) {
@@ -96,6 +97,29 @@
 
         button:hover {
             background-color: #45a049;
+        }
+
+        /* إعلان */
+        .ad {
+            text-align: center;
+            margin: 20px 0;
+            background-color: #ff5722;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.5s;
+        }
+
+        .ad a {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .ad a:hover {
+            text-decoration: underline;
         }
 
         /* استجابة للهاتف المحمول */
@@ -132,6 +156,11 @@
 </head>
 <body>
     <div class="container">
+        <!-- إعلان -->
+        <div class="ad">
+            <a href="https://whomeenoaglauns.com/4/8706620" target="_blank">شاهد إعلاننا الخاص هنا!</a>
+        </div>
+
         <h1>أسعار العملات الرقمية</h1>
         <input type="text" id="search" placeholder="بحث عن عملة..." onkeyup="searchCurrency()">
         <table id="cryptoTable">
@@ -159,16 +188,14 @@
             fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=${currentPage}&sparkline=false`)
                 .then(response => response.json())
                 .then(data => {
-                    // التحقق من العملات الجديدة ومقارنتها مع البيانات السابقة
                     if (lastFetchedData.length > 0) {
                         const newCoins = data.filter(coin => !lastFetchedData.some(lastCoin => lastCoin.id === coin.id));
                         if (newCoins.length > 0) {
-                            displayNewCoins(newCoins); // عرض العملات الجديدة فقط
+                            displayNewCoins(newCoins);
                         }
                     }
-
-                    displayData(data); // عرض جميع العملات
-                    lastFetchedData = data; // تحديث البيانات السابقة
+                    displayData(data);
+                    lastFetchedData = data;
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
@@ -191,14 +218,14 @@
             const tableBody = document.getElementById('tableBody');
             newCoins.forEach(coin => {
                 const row = document.createElement('tr');
-                row.classList.add('new-coin'); // إضافة فئة لتمييز العملات الجديدة
+                row.classList.add('new-coin');
                 row.innerHTML = `
                     <td>${coin.name} (جديد)</td>
                     <td>${coin.current_price} USD</td>
                     <td>${coin.price_change_percentage_24h.toFixed(2)}%</td>
                     <td>${coin.total_volume.toLocaleString()} USD</td>
                 `;
-                tableBody.insertBefore(row, tableBody.firstChild); // إضافة العملة الجديدة في أعلى الجدول
+                tableBody.insertBefore(row, tableBody.firstChild);
             });
         }
 
@@ -220,11 +247,18 @@
             fetchData();
         }
 
-        // تحديث البيانات كل 10 ثوانٍ
-        setInterval(fetchData, 10000);
+        function randomizeColors() {
+            const randomColor = () => `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+            document.querySelector('.ad').style.backgroundColor = randomColor();
+            document.querySelectorAll('th').forEach(th => th.style.backgroundColor = randomColor());
+        }
 
-        // تحميل البيانات الأولى عند تحميل الصفحة
-        window.onload = fetchData;
+        setInterval(fetchData, 10000);
+        setInterval(randomizeColors, 5000); // تغيير الألوان كل 5 ثوانٍ
+        window.onload = () => {
+            fetchData();
+            randomizeColors();
+        };
     </script>
 </body>
-</html>
+    </html>
