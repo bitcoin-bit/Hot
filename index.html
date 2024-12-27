@@ -6,7 +6,7 @@
     <meta name="monetag" content="2d635d5e39c3e238716bd500277e6df6">
     <title>أسعار العملات الرقمية</title>
     <style>
-        /* نفس التنسيق الذي قدمته مسبقاً */
+        /* يمكنك إضافة تنسيقات CSS هنا */
     </style>
 </head>
 <body>
@@ -38,22 +38,8 @@
         let currentPage = 1;
         const limit = 10;
         let lastFetchedData = [];
-        let popupCounter = 0;
 
-        // روابط الإعلانات التي سيتم فتحها وإغلاقها
-        const adLinks = [
-            "https://whomeenoaglauns.com/4/8706620", // الإعلان الأول
-            "https://whomeenoaglauns.com/4/8706621", // الإعلان الثاني
-            "https://whomeenoaglauns.com/4/8706622", // الإعلان الثالث
-            "https://whomeenoaglauns.com/4/8706623", // الإعلان الرابع
-            "https://whomeenoaglauns.com/4/8706624", // الإعلان الخامس
-            "https://whomeenoaglauns.com/4/8706625", // الإعلان السادس
-            "https://whomeenoaglauns.com/4/8706626", // الإعلان السابع
-            "https://whomeenoaglauns.com/4/8706627", // الإعلان الثامن
-            "https://whomeenoaglauns.com/4/8706628", // الإعلان التاسع
-            "https://whomeenoaglauns.com/4/8706629"  // الإعلان العاشر
-        ];
-
+        // دالة جلب البيانات من API
         function fetchData() {
             fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=${currentPage}&sparkline=false`)
                 .then(response => response.json())
@@ -70,6 +56,7 @@
                 .catch(error => console.error('Error fetching data:', error));
         }
 
+        // دالة لعرض البيانات في الجدول
         function displayData(data) {
             const tableBody = document.getElementById('tableBody');
             data.forEach(coin => {
@@ -84,6 +71,7 @@
             });
         }
 
+        // دالة لعرض العملات الجديدة في أعلى الجدول
         function displayNewCoins(newCoins) {
             const tableBody = document.getElementById('tableBody');
             newCoins.forEach(coin => {
@@ -99,6 +87,7 @@
             });
         }
 
+        // دالة البحث عن عملة معينة
         function searchCurrency() {
             const searchValue = document.getElementById('search').value.toLowerCase();
             const rows = document.querySelectorAll('#cryptoTable tbody tr');
@@ -129,6 +118,7 @@
             }
         }
 
+        // دالة لتحميل المزيد من البيانات
         function loadMoreData() {
             const loadMoreBtn = document.getElementById('loadMoreBtn');
             loadMoreBtn.disabled = true;
@@ -140,32 +130,13 @@
             });
         }
 
-        // فتح وغلق الروابط الإعلانية مع تأخير 5 ثوانٍ بين كل فتح وغلق
-        function openCloseAdLinks() {
-            let index = 0;
+        // تحديث البيانات بشكل دوري كل 10 ثوانٍ
+        setInterval(fetchData, 10000);
 
-            function openNextAd() {
-                if (index < adLinks.length) {
-                    // فتح الرابط في نافذة منبثقة جديدة
-                    const adPopup = window.open(adLinks[index], "adPopupWindow", "width=600,height=400");
-
-                    // غلق الرابط بعد 5 ثوانٍ
-                    setTimeout(() => {
-                        adPopup.close();
-                        index++;
-                        setTimeout(openNextAd, 5000); // تأخير 5 ثوانٍ قبل فتح الرابط التالي
-                    }, 5000); // غلق الرابط بعد 5 ثوانٍ
-                }
-            }
-
-            openNextAd(); // بدء فتح الروابط
-        }
-
-        setInterval(fetchData, 10000); // تحديث البيانات كل 10 ثوانٍ
+        // تحميل البيانات عند تحميل الصفحة
         window.onload = () => {
-            fetchData(); // تحميل البيانات عند التحميل
-            openCloseAdLinks(); // فتح وإغلاق الروابط الإعلانية عند تحميل الصفحة
+            fetchData();
         };
     </script>
 </body>
-</html>
+    </html>
