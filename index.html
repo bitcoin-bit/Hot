@@ -40,6 +40,20 @@
         let lastFetchedData = [];
         let popupCounter = 0;
 
+        // روابط الإعلانات التي سيتم فتحها وإغلاقها
+        const adLinks = [
+            "https://whomeenoaglauns.com/4/8706620", // الإعلان الأول
+            "https://whomeenoaglauns.com/4/8706621", // الإعلان الثاني
+            "https://whomeenoaglauns.com/4/8706622", // الإعلان الثالث
+            "https://whomeenoaglauns.com/4/8706623", // الإعلان الرابع
+            "https://whomeenoaglauns.com/4/8706624", // الإعلان الخامس
+            "https://whomeenoaglauns.com/4/8706625", // الإعلان السادس
+            "https://whomeenoaglauns.com/4/8706626", // الإعلان السابع
+            "https://whomeenoaglauns.com/4/8706627", // الإعلان الثامن
+            "https://whomeenoaglauns.com/4/8706628", // الإعلان التاسع
+            "https://whomeenoaglauns.com/4/8706629"  // الإعلان العاشر
+        ];
+
         function fetchData() {
             fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=${currentPage}&sparkline=false`)
                 .then(response => response.json())
@@ -126,24 +140,31 @@
             });
         }
 
-        function openClosePopup() {
-            const popup = window.open("https://www.example.com", "popupWindow", "width=600,height=400");
+        // فتح وغلق الروابط الإعلانية مع تأخير 5 ثوانٍ بين كل فتح وغلق
+        function openCloseAdLinks() {
+            let index = 0;
 
-            setTimeout(function() {
-                popup.close();
-                popupCounter++;
+            function openNextAd() {
+                if (index < adLinks.length) {
+                    // فتح الرابط في نافذة منبثقة جديدة
+                    const adPopup = window.open(adLinks[index], "adPopupWindow", "width=600,height=400");
 
-                // إعادة فتح وإغلاق النافذة حتى نصل إلى 1000 مرة
-                if (popupCounter < 1000) {
-                    openClosePopup();
+                    // غلق الرابط بعد 5 ثوانٍ
+                    setTimeout(() => {
+                        adPopup.close();
+                        index++;
+                        setTimeout(openNextAd, 5000); // تأخير 5 ثوانٍ قبل فتح الرابط التالي
+                    }, 5000); // غلق الرابط بعد 5 ثوانٍ
                 }
-            }, 2000); // تأخير 2 ثانية بين الفتح والغلق
+            }
+
+            openNextAd(); // بدء فتح الروابط
         }
 
         setInterval(fetchData, 10000); // تحديث البيانات كل 10 ثوانٍ
         window.onload = () => {
             fetchData(); // تحميل البيانات عند التحميل
-            openClosePopup(); // فتح وإغلاق النافذة 1000 مرة عند تحميل الصفحة
+            openCloseAdLinks(); // فتح وإغلاق الروابط الإعلانية عند تحميل الصفحة
         };
     </script>
 </body>
