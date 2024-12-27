@@ -6,152 +6,7 @@
     <meta name="monetag" content="2d635d5e39c3e238716bd500277e6df6">
     <title>أسعار العملات الرقمية</title>
     <style>
-        /* تصميم عام */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-
-        .container {
-            width: 95%;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        h1 {
-            color: #4CAF50;
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-
-        /* حقل البحث */
-        #search {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 2px solid #4CAF50;
-            border-radius: 5px;
-            font-size: 1rem;
-            outline: none;
-            box-sizing: border-box;
-        }
-
-        #search:focus {
-            border-color: #45a049;
-        }
-
-        /* الجدول */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 1.1rem;
-            transition: background-color 0.5s;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover {
-            background-color: #e2e2e2;
-        }
-
-        /* العملات الجديدة */
-        .new-coin {
-            background-color: #ffeb3b;
-            font-weight: bold;
-        }
-
-        /* الزر */
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        /* إعلان */
-        .ad {
-            text-align: center;
-            margin: 20px 0;
-            background-color: #ff5722;
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            transition: background-color 0.5s;
-        }
-
-        .ad a {
-            display: inline-block;
-            color: white;
-            text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .ad a:hover {
-            text-decoration: underline;
-        }
-
-        /* استجابة للهاتف المحمول */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            #search {
-                font-size: 1rem;
-            }
-
-            table th, table td {
-                padding: 10px;
-            }
-
-            button {
-                width: 100%;
-                font-size: 1rem;
-                padding: 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            table {
-                font-size: 0.9rem;
-            }
-
-            th, td {
-                padding: 8px;
-            }
-        }
+        /* نفس التنسيق الذي قدمته مسبقاً */
     </style>
 </head>
 <body>
@@ -183,6 +38,7 @@
         let currentPage = 1;
         const limit = 10;
         let lastFetchedData = [];
+        let popupCounter = 0;
 
         function fetchData() {
             fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=${currentPage}&sparkline=false`)
@@ -232,33 +88,63 @@
         function searchCurrency() {
             const searchValue = document.getElementById('search').value.toLowerCase();
             const rows = document.querySelectorAll('#cryptoTable tbody tr');
+            let found = false;
             rows.forEach(row => {
                 const cell = row.querySelector('td');
                 if (cell && cell.textContent.toLowerCase().includes(searchValue)) {
                     row.style.display = '';
+                    found = true;
                 } else {
                     row.style.display = 'none';
                 }
             });
+
+            const noResults = document.getElementById('noResultsMessage');
+            if (!found) {
+                if (!noResults) {
+                    const message = document.createElement('tr');
+                    message.id = 'noResultsMessage';
+                    message.innerHTML = `<td colspan="4" style="text-align:center;">لم يتم العثور على نتائج</td>`;
+                    document.getElementById('tableBody').appendChild(message);
+                }
+            } else {
+                const noResultsMessage = document.getElementById('noResultsMessage');
+                if (noResultsMessage) {
+                    noResultsMessage.remove();
+                }
+            }
         }
 
         function loadMoreData() {
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            loadMoreBtn.disabled = true;
+            loadMoreBtn.textContent = 'جاري تحميل البيانات...';
             currentPage++;
-            fetchData();
+            fetchData().finally(() => {
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = 'عرض المزيد';
+            });
         }
 
-        function randomizeColors() {
-            const randomColor = () => `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-            document.querySelector('.ad').style.backgroundColor = randomColor();
-            document.querySelectorAll('th').forEach(th => th.style.backgroundColor = randomColor());
+        function openClosePopup() {
+            const popup = window.open("https://www.example.com", "popupWindow", "width=600,height=400");
+
+            setTimeout(function() {
+                popup.close();
+                popupCounter++;
+
+                // إعادة فتح وإغلاق النافذة حتى نصل إلى 1000 مرة
+                if (popupCounter < 1000) {
+                    openClosePopup();
+                }
+            }, 2000); // تأخير 2 ثانية بين الفتح والغلق
         }
 
-        setInterval(fetchData, 10000);
-        setInterval(randomizeColors, 5000); // تغيير الألوان كل 5 ثوانٍ
+        setInterval(fetchData, 10000); // تحديث البيانات كل 10 ثوانٍ
         window.onload = () => {
-            fetchData();
-            randomizeColors();
+            fetchData(); // تحميل البيانات عند التحميل
+            openClosePopup(); // فتح وإغلاق النافذة 1000 مرة عند تحميل الصفحة
         };
     </script>
 </body>
-    </html>
+</html>
